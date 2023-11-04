@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ConectMusic</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        .search-container {
+            text-align: center;
+            padding: 50px;
+        }
+        .search-input {
+            width: 60%;
+        }
+        .search-button {
+            background-color: #1DB954;
+            color: #fff;
+        }
+        #results {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="search-container">
+                    <h1>ConectMusic</h1>
+                    <input id="search-input" class="search-input form-control" type="text" placeholder="Digite o nome da música">
+                    <br>
+                    <button id="search-button" class="search-button btn btn-success">Buscar</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="results">
+                    <!-- Resultados da pesquisa da API Deezer serão exibidos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#search-button').click(function () {
+                searchDeezerTracks();
+            });
+
+            function searchDeezerTracks() {
+                const searchTerm = $('#search-input').val();
+                const url = `https://api.deezer.com/search?q=${encodeURIComponent(searchTerm)}`;
+
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    success: function (data) {
+                        displayResults(data);
+                    },
+                    error: function (error) {
+                        console.error('Erro: ' + error);
+                    }
+                });
+            }
+
+            function displayResults(data) {
+                const resultsDiv = $('#results');
+                resultsDiv.empty();
+
+                if (data.data.length === 0) {
+                    resultsDiv.append('<p>Nenhum resultado encontrado.</p>');
+                } else {
+                    $.each(data.data, function (index, track) {
+                        const trackName = track.title;
+                        const artist = track.artist.name;
+                        const album = track.album.title;
+                        const imageUrl = track.album.cover_medium;
+
+                        const resultItem = `
+                            <div class="card" style="width: 18rem;">
+                                <img src="${imageUrl}" class="card-img-top" alt="Capa do Álbum">
+                                <div class="card-body">
+                                    <h5 class="card-title">${trackName}</h5>
+                                    <p class="card-text">Artista: ${artist}</p>
+                                    <p class="card-text">Álbum: ${album}</p>
+                                </div>
+                            </div>
+                        `;
+
+                        resultsDiv.append(resultItem);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
